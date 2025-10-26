@@ -1,0 +1,28 @@
+services:
+  # PostgreSQL service
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: dicomuser
+      POSTGRES_PASSWORD: dicompass
+      POSTGRES_DB: dicomdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - dicomdb_data:/var/lib/postgresql/data
+
+  # FastAPI service
+  fastapi:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://dicomuser:dicompass@db/dicomdb
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  dicomdb_data:
